@@ -6,6 +6,9 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import type { Editor } from "@tiptap/react";
 
+// * 文章编辑器组件 — 基于 Tiptap 的富文本编辑器
+// * 支持：加粗/斜体、标题(H1-H3)、列表、代码块、链接
+// * 可选：自动保存、Ctrl+S 手动保存
 interface ArticleEditorProps {
   initialContent?: string;
   onChange?: (content: string) => void;
@@ -13,6 +16,7 @@ interface ArticleEditorProps {
   autoSaveInterval?: number;
 }
 
+// * 工具栏按钮 — 通用的格式化按钮组件，active 状态高亮
 function ToolbarButton({
   active,
   disabled,
@@ -43,6 +47,7 @@ function ToolbarButton({
   );
 }
 
+// * 编辑器工具栏 — 包含所有格式化按钮和链接插入功能
 function Toolbar({
   editor,
   showLinkInput,
@@ -198,6 +203,7 @@ export function ArticleEditor({
 }: ArticleEditorProps) {
   const [saving, setSaving] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
+  // * saveCallbackRef — 保存回调的 ref，避免 auto-save 的闭包陷阱
   const saveCallbackRef = useRef(onSave);
   saveCallbackRef.current = onSave;
 
@@ -234,7 +240,7 @@ export function ArticleEditor({
 
   const toggleLinkInput = useCallback(() => setShowLinkInput((v) => !v), []);
 
-  // Keyboard shortcuts
+  // * 快捷键 — Cmd/Ctrl+S 保存，Cmd/Ctrl+K 插入/切换链接
   useEffect(() => {
     if (!editor) return;
 
@@ -253,7 +259,8 @@ export function ArticleEditor({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [editor, handleSave]);
 
-  // Auto-save
+  // * 自动保存 — 按 autoSaveInterval 毫秒间隔定期调用 onSave
+  // ! 使用 saveCallbackRef 避免闭包捕获过期的 onSave 引用
   useEffect(() => {
     if (!autoSaveInterval || !onSave || !editor) return;
     const id = setInterval(() => {

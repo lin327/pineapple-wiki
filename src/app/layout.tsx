@@ -5,8 +5,10 @@ import { Sidebar } from "@/components/Sidebar";
 import { SearchBar } from "@/components/SearchBar";
 import { ToastProvider } from "@/components/Toast";
 import { db } from "@/db";
-import { categories, tags } from "@/db/schema";
-import { asc } from "drizzle-orm";
+import { entities } from "@/db/schema";
+import { eq, count } from "drizzle-orm";
+import { readFileSync, readdirSync, existsSync } from "fs";
+import { join } from "path";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,31 +22,42 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Wiki",
-    template: "%s | Wiki",
+    default: "Ops Wiki",
+    template: "%s | Ops Wiki",
   },
-  description: "A knowledge base wiki",
+  description: "运维知识图谱 — CMDB + 调用链 + 变更记录 + 监控告警",
 };
 
-async function getCategories() {
+async function getEntityCounts(): Promise<Record<string, number>> {
   try {
-    return await db()
-      .select({ id: categories.id, name: categories.name, slug: categories.slug })
-      .from(categories)
-      .orderBy(asc(categories.name));
-  } catch {
-    return [];
-  }
-}
+    const rows = await db()
+      .select({ type: entities.type, cnt: count() })
+      .from(entities)
+      .groupBy(entities.type);
+    const counts = Object.fromEntries(rows.map((r) => [r.type, Number(r.cnt)]));
 
-async function getTags() {
-  try {
-    return await db()
-      .select({ id: tags.id, name: tags.name })
-      .from(tags)
-      .orderBy(asc(tags.name));
+    // 计算 pineapple-ops 仓库中的 YAML 文件数
+    const opsDir = "/Users/pineapple/Desktop/workspace/Projects/pineapple-ops";
+    let docsCount = 0;
+    if (existsSync(opsDir)) {
+      const countYaml = (dir: string): number => {
+        let n = 0;
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          if (entry.isDirectory()) {
+            n += countYaml(join(dir, entry.name));
+          } else if (entry.name.endsWith(".yaml") || entry.name.endsWith(".yml")) {
+            n++;
+          }
+        }
+        return n;
+      };
+      docsCount = countYaml(opsDir);
+    }
+    counts.docs = docsCount;
+
+    return counts;
   } catch {
-    return [];
+    return {};
   }
 }
 
@@ -53,10 +66,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [categories, tags] = await Promise.all([
-    getCategories(),
-    getTags(),
-  ]);
+  const entityCounts = await getEntityCounts();
 
   return (
     <html
@@ -66,7 +76,7 @@ export default async function RootLayout({
       <body className="min-h-full bg-gray-50 text-gray-900 font-sans">
         <ToastProvider>
           <div className="flex min-h-screen">
-            <Sidebar categories={categories} tags={tags} />
+            <Sidebar entityCounts={entityCounts} />
             <div className="flex-1 flex flex-col min-w-0">
               <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 py-3 lg:pl-6 pl-16">
                 <SearchBar />

@@ -10,10 +10,13 @@ import {
 } from "@/lib/api";
 import { eq, desc, asc, ilike, and, inArray, count } from "drizzle-orm";
 
+// * 转义 LIKE 通配符 — 防止用户输入的 % 和 _ 被当作模式匹配符
 function escapeLikePattern(s: string): string {
   return s.replace(/[%_]/g, "\\$&");
 }
 
+// * 创建文章的入参校验 schema
+// * slug 格式限制为小写字母、数字和连字符，用于 URL 友好路径
 const createArticleSchema = z.object({
   title: z.string().min(1, "标题不能为空").max(255),
   slug: z
@@ -30,6 +33,7 @@ const createArticleSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
+    // * 分页参数 — page 从 1 开始，limit 上限 100 防止过量查询
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "12")));
     const category = searchParams.get("category");
@@ -37,6 +41,7 @@ export async function GET(request: NextRequest) {
     const q = searchParams.get("q");
     const sort = searchParams.get("sort") || "newest";
 
+    // * 动态构建 WHERE 条件 — 支持按分类、标签、关键词组合筛选
     const conditions = [];
 
     if (category) {
@@ -52,7 +57,8 @@ export async function GET(request: NextRequest) {
       conditions.push(ilike(articles.title, `%${escapeLikePattern(q)}%`));
     }
 
-    // If filtering by tag, get matching article IDs first
+    // * 标签筛选 — 先查标签关联的文章 ID，再用 inArray 过滤
+    // ? 标签不存在时静默跳过，是否应该返回空结果或报错？
     if (tag) {
       const tagRow = await db().query.tags.findFirst({
         where: (t, { eq }) => eq(t.name, tag),
@@ -75,6 +81,7 @@ export async function GET(request: NextRequest) {
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
+    // * 排序逻辑 — newest(默认)/oldest 按时间，title 按字母序
     const orderFn =
       sort === "oldest"
         ? asc(articles.createdAt)
@@ -82,6 +89,7 @@ export async function GET(request: NextRequest) {
           ? asc(articles.title)
           : desc(articles.createdAt);
 
+    // * 先查总数用于分页元数据，再查当前页数据
     const [{ total }] = await db()
       .select({ total: count() })
       .from(articles)
@@ -124,6 +132,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const parsed = createArticleSchema.parse(body);
 
+    // ! slug 唯一性检查 — 重复 slug 返回 409 Conflict
     const existing = await db().query.articles.findFirst({
       where: (a, { eq }) => eq(a.slug, parsed.slug),
     });
@@ -131,6 +140,7 @@ export async function POST(request: NextRequest) {
       return errorResponse("SLUG_EXISTS", "该 slug 已存在", 409);
     }
 
+    // * 插入文章并返回完整记录（.returning() 是 Drizzle 的 PostgreSQL 特性）
     const [article] = await db()
       .insert(articles)
       .values({
@@ -142,6 +152,7 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
+    // * 批量插入标签关联 — 仅在 tagIds 非空时执行
     if (parsed.tagIds && parsed.tagIds.length > 0) {
       await db().insert(articleTags).values(
         parsed.tagIds.map((tagId) => ({

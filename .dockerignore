@@ -1,17 +1,57 @@
+# dependencies
 node_modules
+
+# next.js
 .next
-.git
-.gitignore
+out
+
+# build
+build
+
+# env (运行时通过 docker 注入，不要打包进镜像)
 .env
 .env.*
 !.env.example
+
+# docker
 Dockerfile
 docker-compose.yml
 docker-compose*.yml
 .dockerignore
-README.md
+
+# git
+.git
+.gitignore
+
+# docs
 *.md
+README.md
+
+# IDE
 .vscode
 .idea
+
+# OS
 .DS_Store
+Thumbs.db
+
+# debug / logs
 npm-debug.log*
+*.log
+
+# test
+coverage
+vitest.config.ts
+src/test
+src/**/__tests__
+playwright.config.ts
+e2e
+
+# hermes
+.hemes
+
+# drizzle
+drizzle/meta/
+
+# scripts (构建时不需要)
+scripts/
