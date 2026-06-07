@@ -7,6 +7,7 @@ import { Breadcrumb } from "@/components/Breadcrumb";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { TableOfContents } from "@/components/TableOfContents";
 import Link from "next/link";
+import { RevisionHistory } from "@/components/RevisionHistory";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -114,8 +115,12 @@ export default async function ArticlePage({ params }: PageProps) {
           <MarkdownRenderer content={article.content} />
         </article>
 
-        <div className="hidden xl:block w-56 shrink-0">
+        <div className="hidden xl:block w-56 shrink-0 space-y-6">
           <TableOfContents content={article.content} />
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">版本历史</h3>
+            <RevisionHistory articleSlug={article.slug} />
+          </div>
         </div>
       </div>
     </div>

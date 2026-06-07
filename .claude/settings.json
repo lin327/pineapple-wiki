@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "command": "npx prettier --write \"$FILE_PATH\"",
+        "description": "自动格式化代码"
+      },
+      {
+        "matcher": "Write|Edit",
+        "command": "timeout 60 npx tsc --noEmit --pretty false --incremental --tsBuildInfoFile node_modules/.cache/tsc-hook.tsbuildinfo",
+        "description": "增量类型检查（带超时保护）"
+      }
+    ]
+  }
+}
