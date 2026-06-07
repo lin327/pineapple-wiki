@@ -4,6 +4,10 @@ import { articles } from "@/db/schema";
 import { successResponse, handleUnknownError } from "@/lib/api";
 import { ilike, or, desc } from "drizzle-orm";
 
+function escapeLikePattern(s: string): string {
+  return s.replace(/[%_]/g, "\\$&");
+}
+
 export async function GET(request: NextRequest) {
   try {
     const q = request.nextUrl.searchParams.get("q");
@@ -12,7 +16,7 @@ export async function GET(request: NextRequest) {
       return successResponse([]);
     }
 
-    const pattern = `%${q.trim()}%`;
+    const pattern = `%${escapeLikePattern(q.trim())}%`;
 
     const results = await db()
       .select({

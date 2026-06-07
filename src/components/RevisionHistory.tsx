@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { formatDateTime } from "@/lib/date";
 
 interface Revision {
   id: number;
@@ -10,20 +11,6 @@ interface Revision {
 
 interface RevisionHistoryProps {
   articleSlug: string;
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    const d = new Date(dateStr);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const hours = String(d.getHours()).padStart(2, "0");
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
-  } catch {
-    return dateStr;
-  }
 }
 
 function getExcerpt(content: string, maxLength = 120): string {
@@ -87,7 +74,7 @@ export function RevisionHistory({ articleSlug }: RevisionHistoryProps) {
             className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 transition-colors"
           >
             <span className="text-sm text-gray-600">
-              {formatDate(rev.createdAt)}
+              {formatDateTime(rev.createdAt)}
             </span>
             <svg
               className={`w-4 h-4 text-gray-400 transition-transform ${

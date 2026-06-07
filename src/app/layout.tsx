@@ -4,6 +4,9 @@ import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { SearchBar } from "@/components/SearchBar";
 import { ToastProvider } from "@/components/Toast";
+import { db } from "@/db";
+import { categories, tags } from "@/db/schema";
+import { asc } from "drizzle-orm";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,25 +26,23 @@ export const metadata: Metadata = {
   description: "A knowledge base wiki",
 };
 
-async function fetchCategories() {
+async function getCategories() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/categories`, {
-      cache: "no-store",
-    });
-    const data = await res.json();
-    return data.success ? data.data : [];
+    return await db()
+      .select({ id: categories.id, name: categories.name, slug: categories.slug })
+      .from(categories)
+      .orderBy(asc(categories.name));
   } catch {
     return [];
   }
 }
 
-async function fetchTags() {
+async function getTags() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/tags`, {
-      cache: "no-store",
-    });
-    const data = await res.json();
-    return data.success ? data.data : [];
+    return await db()
+      .select({ id: tags.id, name: tags.name })
+      .from(tags)
+      .orderBy(asc(tags.name));
   } catch {
     return [];
   }
@@ -53,13 +54,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const [categories, tags] = await Promise.all([
-    fetchCategories(),
-    fetchTags(),
+    getCategories(),
+    getTags(),
   ]);
 
   return (
     <html
-      lang="en"
+      lang="zh-CN"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-gray-50 text-gray-900 font-sans">

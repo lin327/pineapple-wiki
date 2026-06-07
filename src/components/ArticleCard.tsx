@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDate } from "@/lib/date";
 
 interface ArticleCardProps {
   title: string;
@@ -8,18 +9,6 @@ interface ArticleCardProps {
   tags?: { id: number; name: string }[];
   date?: string;
   className?: string;
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    const d = new Date(dateStr);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  } catch {
-    return dateStr;
-  }
 }
 
 export function ArticleCard({

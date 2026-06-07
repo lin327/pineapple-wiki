@@ -10,6 +10,10 @@ import {
 } from "@/lib/api";
 import { eq, desc, asc, ilike, and, inArray, count } from "drizzle-orm";
 
+function escapeLikePattern(s: string): string {
+  return s.replace(/[%_]/g, "\\$&");
+}
+
 const createArticleSchema = z.object({
   title: z.string().min(1, "标题不能为空").max(255),
   slug: z
@@ -45,7 +49,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (q) {
-      conditions.push(ilike(articles.title, `%${q}%`));
+      conditions.push(ilike(articles.title, `%${escapeLikePattern(q)}%`));
     }
 
     // If filtering by tag, get matching article IDs first

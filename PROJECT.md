@@ -3,7 +3,7 @@
 ## 技术栈
 
 | 层 | 方案 | 版本 |
-|---|---|---|
+| --- | --- | --- |
 | 框架 | Next.js (App Router) | 15.x |
 | 语言 | TypeScript | 5.x |
 | ORM | Drizzle ORM | latest |
@@ -19,8 +19,9 @@
 ## 数据库设计
 
 ### articles 表
+
 | 字段 | 类型 | 说明 |
-|---|---|---|
+| --- | --- | --- |
 | id | serial | 主键 |
 | title | varchar(255) | 标题 |
 | slug | varchar(255) | URL 友好标识，唯一 |
@@ -31,27 +32,31 @@
 | updated_at | timestamp | 更新时间 |
 
 ### categories 表
+
 | 字段 | 类型 | 说明 |
-|---|---|---|
+| --- | --- | --- |
 | id | serial | 主键 |
 | name | varchar(100) | 分类名 |
 | slug | varchar(100) | URL 标识，唯一 |
 
 ### tags 表
+
 | 字段 | 类型 | 说明 |
-|---|---|---|
+| --- | --- | --- |
 | id | serial | 主键 |
 | name | varchar(50) | 标签名，唯一 |
 
 ### article_tags 表（多对多）
+
 | 字段 | 类型 | 说明 |
-|---|---|---|
+| --- | --- | --- |
 | article_id | integer | 外键 → articles |
 | tag_id | integer | 外键 → tags |
 
 ### revisions 表（版本历史）
+
 | 字段 | 类型 | 说明 |
-|---|---|---|
+| --- | --- | --- |
 | id | serial | 主键 |
 | article_id | integer | 外键 → articles |
 | content | text | 该版本内容 |
@@ -61,7 +66,7 @@
 
 ## 页面路由
 
-```
+```text
 /                    → 首页：文章列表 + 搜索栏
 /wiki/[slug]         → 文章详情（Markdown 渲染）
 /edit                → 新建文章
@@ -74,7 +79,7 @@
 
 ## API 路由 (Route Handlers)
 
-```
+```text
 GET    /api/articles           → 文章列表（支持 ?category=&tag=&q=）
 POST   /api/articles           → 新建文章
 GET    /api/articles/[slug]    → 文章详情
@@ -91,7 +96,7 @@ GET    /api/search?q=xxx       → 全文搜索
 
 ## 目录结构
 
-```
+```text
 wiki/
 ├── Dockerfile
 ├── docker-compose.yml
@@ -254,6 +259,7 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 ## UI 设计规范
 
 ### 风格
+
 - **现代卡片风 + 亮色简约**
 - 圆角卡片（border-radius: 12px）
 - 柔和阴影（shadow-md / shadow-lg）
@@ -263,7 +269,7 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 ### 配色
 
 | 用途 | 颜色 | 说明 |
-|---|---|---|
+| --- | --- | --- |
 | 主色 | `#2563EB` (blue-600) | 按钮、链接、高亮 |
 | 主色 hover | `#1D4ED8` (blue-700) | 按钮悬浮 |
 | 次色 | `#6366F1` (indigo-500) | 标签、装饰 |
@@ -278,7 +284,7 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 ### 排版
 
 | 元素 | 字号 | 字重 |
-|---|---|---|
+| --- | --- | --- |
 | 页面标题 | text-3xl (30px) | font-bold |
 | 文章标题 | text-xl (20px) | font-semibold |
 | 正文 | text-base (16px) | font-normal |
@@ -288,7 +294,8 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 ### 组件样式
 
 **文章卡片：**
-```
+
+```text
 ┌──────────────────────────────────┐
 │  [分类标签]          2024-06-07  │
 │                                  │
@@ -298,20 +305,24 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 │  [tag1] [tag2]                   │
 └──────────────────────────────────┘
 ```
+
 - 白色背景、圆角 12px、shadow-sm
 - hover 时 shadow-md + translateY(-2px)
 
 **侧边栏：**
+
 - 白色背景
 - 分类列表带圆点指示器
 - 标签用 pill 样式（小圆角胶囊）
 
 **编辑器：**
+
 - 白色卡片包裹
 - 工具栏浅灰背景
 - 输入区无边框，focus 时蓝色描边
 
 **按钮：**
+
 - 主按钮：蓝底白字，圆角 8px
 - 次按钮：白底灰边
 - 危险按钮：红底白字（删除用）
@@ -319,28 +330,33 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 ### 动画
 
 | 元素 | 动画 | 时长 |
-|---|---|---|
+| --- | --- | --- |
 | 卡片 hover | translateY(-2px) + shadow 升级 | 200ms |
 | 页面切换 | fade-in | 300ms |
 | 按钮点击 | scale(0.98) | 100ms |
 | Toast 提示 | slide-in from top | 250ms |
 
 ### 响应式布局
+
 - 桌面：侧边栏 + 内容区
 - 移动端：侧边栏折叠为汉堡菜单，内容全宽
 - 编辑器移动端适配（工具栏精简）
 
 ### 404 页面
+
 - `src/app/not-found.tsx` — 全局 404
 - 文章详情页找不到时显示"文章不存在"提示 + 返回首页链接
 
 ### Loading 状态
+
 - `src/app/loading.tsx` — 全局骨架屏
 - 文章列表、详情页用 `Suspense` 包裹，显示 skeleton 占位
 
 ### 输入校验
+
 - 使用 **Zod** 校验所有 API 入参
 - 统一错误格式：
+
 ```json
 {
   "success": false,
@@ -352,6 +368,7 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 ```
 
 ### API 统一响应格式
+
 ```json
 // 成功
 { "success": true, "data": { ... } }
@@ -360,16 +377,19 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 ```
 
 ### SEO
+
 - 每页动态 `<title>` + `<meta description>`
 - 文章页用 Open Graph 标签（`og:title`, `og:description`）
 - `src/app/wiki/[slug]/page.tsx` 导出 `generateMetadata()`
 
 ### Middleware
+
 - `src/middleware.ts` — 预留
 - 后续加登录时用于保护 `/edit` 路由
 - 初期可留空或仅做日志
 
 ### 依赖补充
+
 ```json
 {
   "zod": "latest",
@@ -381,44 +401,52 @@ DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?ss
 ```
 
 ### Markdown 渲染
+
 - 使用 **react-markdown** + **remark-gfm**（支持表格、任务列表、删除线）
 - 代码块用 **rehype-highlight** + **highlight.js** 语法高亮
 - 代码块右上角显示语言标签 + 复制按钮
 - 图片支持懒加载（loading="lazy"）
 
 ### 目录（TOC）
+
 - 文章详情页右侧显示目录导航（桌面端）
 - 自动提取 `##` `###` 标题生成锚点
 - 滚动时高亮当前章节
 - 移动端折叠为浮动按钮，点击展开
 
 ### 面包屑导航
+
 - 文章详情页：首页 > 分类名 > 文章标题
 - 分类页：首页 > 分类名
 
 ### 分页
+
 - 文章列表默认每页 12 篇
 - 底部分页器（上一页 / 页码 / 下一页）
 - API 支持 `?page=1&limit=12`
 
 ### 排序与筛选
+
 - 文章列表支持：最新 / 最早 / 标题 A-Z
 - 分类筛选 + 标签筛选可组合
 
 ### 图片处理
+
 - Markdown 中图片正常渲染
 - 后续扩展：上传到 S3 / 本地 public 目录
 - 初期支持外链图片
 
 ### 键盘快捷键（编辑器）
+
 | 快捷键 | 功能 |
-|---|---|
+| --- | --- |
 | Ctrl+S / Cmd+S | 保存 |
 | Ctrl+B / Cmd+B | 加粗 |
 | Ctrl+I / Cmd+I | 斜体 |
 | Ctrl+K / Cmd+K | 插入链接 |
 
 ### Toast 通知
+
 - 操作成功/失败时右上角弹出提示
 - 自动 3 秒消失
 - 类型：success（绿）/ error（红）/ info（蓝）
