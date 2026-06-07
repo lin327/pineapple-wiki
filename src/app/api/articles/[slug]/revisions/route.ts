@@ -15,7 +15,7 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    const article = await db.query.articles.findFirst({
+    const article = await db().query.articles.findFirst({
       where: (a, { eq }) => eq(a.slug, slug),
     });
 
@@ -23,7 +23,7 @@ export async function GET(
       return errorResponse("NOT_FOUND", "文章不存在", 404);
     }
 
-    const revisionList = await db
+    const revisionList = await db()
       .select({
         id: revisions.id,
         content: revisions.content,

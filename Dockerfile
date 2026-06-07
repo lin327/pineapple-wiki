@@ -12,10 +12,6 @@ RUN npm ci
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Accept DATABASE_URL at build time
-ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
-
 # Copy dependencies from stage 1
 COPY --from=deps /app/node_modules ./node_modules
 

@@ -7,7 +7,7 @@ async function seed() {
 
   // 1. 创建分类
   console.log("📁 创建分类...");
-  const insertedCategories = await db
+  const insertedCategories = await db()
     .insert(categories)
     .values([
       { name: "技术笔记", slug: "tech-notes" },
@@ -23,7 +23,7 @@ async function seed() {
 
   // 2. 创建标签
   console.log("🏷️  创建标签...");
-  const insertedTags = await db
+  const insertedTags = await db()
     .insert(tags)
     .values([
       { name: "Next.js" },
@@ -321,7 +321,7 @@ Serverless 环境下需要注意连接池的配置，避免连接数过多。
   for (const articleData of articlesData) {
     const { tagNames, ...articleValues } = articleData;
 
-    const [inserted] = await db
+    const [inserted] = await db()
       .insert(articles)
       .values(articleValues)
       .returning();
@@ -332,7 +332,7 @@ Serverless 环境下需要注意连接池的配置，避免连接数过多。
       tagId: tagMap[tagName],
     }));
 
-    await db.insert(articleTags).values(tagAssociations);
+    await db().insert(articleTags).values(tagAssociations);
 
     console.log(`   ✅ 《${inserted.title}》 → [${tagNames.join(", ")}]`);
   }
@@ -340,10 +340,10 @@ Serverless 环境下需要注意连接池的配置，避免连接数过多。
   // 4. 验证数据
   console.log("\n🔍 验证插入结果...\n");
 
-  const allCategories = await db.select().from(categories);
-  const allTags = await db.select().from(tags);
-  const allArticles = await db.select().from(articles);
-  const allArticleTags = await db.select().from(articleTags);
+  const allCategories = await db().select().from(categories);
+  const allTags = await db().select().from(tags);
+  const allArticles = await db().select().from(articles);
+  const allArticleTags = await db().select().from(articleTags);
 
   console.log(`📁 分类: ${allCategories.length} 个`);
   allCategories.forEach((c) => console.log(`   - ${c.name} (${c.slug})`));

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const conditions = [];
 
     if (category) {
-      const categoryRow = await db.query.categories.findFirst({
+      const categoryRow = await db().query.categories.findFirst({
         where: (c, { eq }) => eq(c.slug, category),
       });
       if (categoryRow) {
@@ -50,11 +50,11 @@ export async function GET(request: NextRequest) {
 
     // If filtering by tag, get matching article IDs first
     if (tag) {
-      const tagRow = await db.query.tags.findFirst({
+      const tagRow = await db().query.tags.findFirst({
         where: (t, { eq }) => eq(t.name, tag),
       });
       if (tagRow) {
-        const tagArticleIds = await db
+        const tagArticleIds = await db()
           .select({ articleId: articleTags.articleId })
           .from(articleTags)
           .where(eq(articleTags.tagId, tagRow.id));
@@ -78,12 +78,12 @@ export async function GET(request: NextRequest) {
           ? asc(articles.title)
           : desc(articles.createdAt);
 
-    const [{ total }] = await db
+    const [{ total }] = await db()
       .select({ total: count() })
       .from(articles)
       .where(where);
 
-    const data = await db
+    const data = await db()
       .select({
         id: articles.id,
         title: articles.title,
@@ -120,14 +120,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const parsed = createArticleSchema.parse(body);
 
-    const existing = await db.query.articles.findFirst({
+    const existing = await db().query.articles.findFirst({
       where: (a, { eq }) => eq(a.slug, parsed.slug),
     });
     if (existing) {
       return errorResponse("SLUG_EXISTS", "该 slug 已存在", 409);
     }
 
-    const [article] = await db
+    const [article] = await db()
       .insert(articles)
       .values({
         title: parsed.title,
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       .returning();
 
     if (parsed.tagIds && parsed.tagIds.length > 0) {
-      await db.insert(articleTags).values(
+      await db().insert(articleTags).values(
         parsed.tagIds.map((tagId) => ({
           articleId: article.id,
           tagId,

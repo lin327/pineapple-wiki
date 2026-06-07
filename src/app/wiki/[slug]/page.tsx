@@ -14,7 +14,7 @@ interface PageProps {
 
 async function getArticle(slug: string) {
   try {
-    const article = await db
+    const article = await db()
       .select({
         id: articles.id,
         title: articles.title,

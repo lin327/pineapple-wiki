@@ -13,7 +13,7 @@ interface PageProps {
 
 async function getCategory(slug: string) {
   try {
-    const cat = await db
+    const cat = await db()
       .select()
       .from(categories)
       .where(eq(categories.slug, slug))
@@ -54,13 +54,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   let totalPages = 0;
 
   try {
-    const [{ total }] = await db
+    const [{ total }] = await db()
       .select({ total: count() })
       .from(articles)
       .where(eq(articles.categoryId, category.id));
     totalPages = Math.ceil(total / limit);
 
-    const data = await db
+    const data = await db()
       .select({
         id: articles.id,
         title: articles.title,

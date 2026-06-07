@@ -35,7 +35,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   if (q) {
     try {
       const pattern = `%${q}%`;
-      results = await db
+      results = await db()
         .select({
           id: articles.id,
           title: articles.title,

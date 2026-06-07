@@ -31,7 +31,7 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    const article = await db.query.articles.findFirst({
+    const article = await db().query.articles.findFirst({
       where: (a, { eq }) => eq(a.slug, slug),
       with: {
         category: true,
@@ -42,7 +42,7 @@ export async function GET(
       return errorResponse("NOT_FOUND", "文章不存在", 404);
     }
 
-    const articleTagRows = await db
+    const articleTagRows = await db()
       .select({ tagId: articleTags.tagId })
       .from(articleTags)
       .where(eq(articleTags.articleId, article.id));
@@ -64,7 +64,7 @@ export async function PUT(
     const body = await request.json();
     const parsed = updateArticleSchema.parse(body);
 
-    const article = await db.query.articles.findFirst({
+    const article = await db().query.articles.findFirst({
       where: (a, { eq }) => eq(a.slug, slug),
     });
 
@@ -73,7 +73,7 @@ export async function PUT(
     }
 
     if (parsed.slug && parsed.slug !== slug) {
-      const slugConflict = await db.query.articles.findFirst({
+      const slugConflict = await db().query.articles.findFirst({
         where: (a, { eq }) => eq(a.slug, parsed.slug!),
       });
       if (slugConflict) {
@@ -82,7 +82,7 @@ export async function PUT(
     }
 
     // Save revision before updating
-    await db.insert(revisions).values({
+    await db().insert(revisions).values({
       articleId: article.id,
       content: article.content,
     });
@@ -94,19 +94,19 @@ export async function PUT(
     if (parsed.categoryId !== undefined) updateData.categoryId = parsed.categoryId;
     if (parsed.isPublished !== undefined) updateData.isPublished = parsed.isPublished;
 
-    const [updated] = await db
+    const [updated] = await db()
       .update(articles)
       .set(updateData)
       .where(eq(articles.id, article.id))
       .returning();
 
     if (parsed.tagIds !== undefined) {
-      await db
+      await db()
         .delete(articleTags)
         .where(eq(articleTags.articleId, article.id));
 
       if (parsed.tagIds.length > 0) {
-        await db.insert(articleTags).values(
+        await db().insert(articleTags).values(
           parsed.tagIds.map((tagId) => ({
             articleId: article.id,
             tagId,
@@ -129,7 +129,7 @@ export async function DELETE(
   try {
     const { slug } = await params;
 
-    const article = await db.query.articles.findFirst({
+    const article = await db().query.articles.findFirst({
       where: (a, { eq }) => eq(a.slug, slug),
     });
 
@@ -138,9 +138,9 @@ export async function DELETE(
     }
 
     // Delete related data first
-    await db.delete(articleTags).where(eq(articleTags.articleId, article.id));
-    await db.delete(revisions).where(eq(revisions.articleId, article.id));
-    await db.delete(articles).where(eq(articles.id, article.id));
+    await db().delete(articleTags).where(eq(articleTags.articleId, article.id));
+    await db().delete(revisions).where(eq(revisions.articleId, article.id));
+    await db().delete(articles).where(eq(articles.id, article.id));
 
     return successResponse({ id: article.id });
   } catch {

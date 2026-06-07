@@ -21,7 +21,7 @@ const createCategorySchema = z.object({
 
 export async function GET() {
   try {
-    const data = await db
+    const data = await db()
       .select()
       .from(categories)
       .orderBy(asc(categories.name));
@@ -37,14 +37,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const parsed = createCategorySchema.parse(body);
 
-    const existing = await db.query.categories.findFirst({
+    const existing = await db().query.categories.findFirst({
       where: (c, { eq }) => eq(c.slug, parsed.slug),
     });
     if (existing) {
       return errorResponse("SLUG_EXISTS", "该 slug 已存在", 409);
     }
 
-    const [category] = await db
+    const [category] = await db()
       .insert(categories)
       .values({ name: parsed.name, slug: parsed.slug })
       .returning();

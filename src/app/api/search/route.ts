@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     const pattern = `%${q.trim()}%`;
 
-    const results = await db
+    const results = await db()
       .select({
         id: articles.id,
         title: articles.title,

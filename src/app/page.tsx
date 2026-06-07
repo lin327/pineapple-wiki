@@ -23,10 +23,10 @@ export default async function HomePage({ searchParams }: PageProps) {
   let totalPages = 0;
 
   try {
-    const [{ total }] = await db.select({ total: count() }).from(articles);
+    const [{ total }] = await db().select({ total: count() }).from(articles);
     totalPages = Math.ceil(total / limit);
 
-    const data = await db
+    const data = await db()
       .select({
         id: articles.id,
         title: articles.title,

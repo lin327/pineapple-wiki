@@ -5,7 +5,7 @@ import { asc } from "drizzle-orm";
 
 export async function GET() {
   try {
-    const data = await db.select().from(tags).orderBy(asc(tags.name));
+    const data = await db().select().from(tags).orderBy(asc(tags.name));
     return successResponse(data);
   } catch {
     return handleUnknownError();
