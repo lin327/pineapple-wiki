@@ -23,8 +23,8 @@ primary_region = 'sin'
 
 [[vm]]
   cpu_kind = 'shared'
-  cpus = 1
-  memory_mb = 512
+  cpus = 16
+  memory_gb = 128
 
 [checks]
   [checks.health]
